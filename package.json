@@ -1,0 +1,28 @@
+{
+  "name": "texttile-language",
+  "version": "0.0.1",
+  "description": "TextTile Language",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "serve": "nodemon src/examples/server.js"
+  },
+  "author": "Cristian Felix",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.10.4",
+    "babel-loader": "^6.2.4",
+    "chai": "^3.5.0",
+    "mocha-logger": "^1.0.3",
+    "webpack": "^1.13.1"
+  },
+  "dependencies": {
+    "dotenv": "^2.0.0",
+    "elasticsearch": "^11.0.1",
+    "express": "^4.14.0",
+    "express-graphql": "^0.5.3",
+    "graphql": "^0.6.0",
+    "isomorphic-fetch": "^2.2.1",
+    "lodash": "^4.13.1"
+  }
+}

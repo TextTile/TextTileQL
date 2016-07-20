@@ -1,0 +1,15 @@
+{
+    "mapping": {
+        "Text": {
+            "field": "text",
+            "type": "Text"
+        }
+    },
+    "config": {
+        "server": "vgc.poly.edu/projects/es-gateway/",
+        "index": "whs6",
+        "type": "document",
+        "user": "user",
+        "password": "8Tp138GMxi"
+    }
+}

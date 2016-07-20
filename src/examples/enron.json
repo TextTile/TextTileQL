@@ -1,0 +1,113 @@
+{
+    "mapping": {
+        "Contents": {
+            "field": "contents",
+            "type": "Text"
+        },
+        "DATE": {
+            "field": "DATE",
+            "type": "Text"
+        },
+        "LOCATION": {
+            "field": "LOCATION",
+            "type": "Text"
+        },
+        "MONEY": {
+            "field": "MONEY",
+            "type": "Text"
+        },
+        "ORGANIZATION": {
+            "field": "ORGANIZATION",
+            "type": "Text"
+        },
+        "PERCENT": {
+            "field": "PERCENT",
+            "type": "Text"
+        },
+        "PERSON": {
+            "field": "PERSON",
+            "type": "Text"
+        },
+        "TIME": {
+            "field": "TIME",
+            "type": "Text"
+        },
+        "BCC": {
+            "field": "bcc",
+            "type": "String"
+        },
+        "CC": {
+            "field": "cc",
+            "type": "String"
+        },
+        "Date": {
+            "field": "date",
+            "type": "Date",
+            "format": "E, dd MMM yyyy HH:mm:ss Z (z)"
+        },
+        "From": {
+            "field": "from",
+            "type": "String"
+        },
+        "FromAddress": {
+            "field": "from-address",
+            "type": "String"
+        },
+        "Hash": {
+            "field": "hash",
+            "type": "String"
+        },
+        "Modified": {
+            "field": "modified",
+            "type": "Date",
+            "format": "strict_date_optional_time||epoch_millis"
+        },
+        "NodeId": {
+            "field": "nodeid",
+            "type": "Number"
+        },
+        "Nouns": {
+            "field": "noun",
+            "type": "Text",
+            "analyzer": "base"
+        },
+        "Path": {
+            "field": "path",
+            "type": "String"
+        },
+        "Subject": {
+            "field": "subject",
+            "type": "String"
+        },
+        "SubjectNouns": {
+            "field": "subject-noun",
+            "type": "Text"
+        },
+        "SubjectVerb": {
+            "field": "subject-verb",
+            "type": "Text"
+        },
+        "Timestamp": {
+            "field": "timestamp",
+            "type": "Date",
+            "format": "strict_date_optional_time||epoch_millis"
+        },
+        "To": {
+            "field": "to",
+            "type": "String"
+        },
+        "ToAddresses": {
+            "field": "to-addresses",
+            "type": "List.String"
+        },
+        "Verbs": {
+            "field": "verb",
+            "type": "String"
+        }
+    },
+    "config": {
+        "server": "vgc.poly.edu/projects/es-gateway",
+        "index": "enron",
+        "type": "email"
+    }
+}
