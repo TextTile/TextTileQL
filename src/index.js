@@ -3,6 +3,7 @@ const { graphql } = require('graphql')
 
 class TextTileLanguage {
     constructor(mapping, adapter) {
+        console.log("working")
         this._adapter = adapter;
         this.mapping = mapping;
         this.ready = Promise.all([
