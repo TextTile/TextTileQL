@@ -37,7 +37,6 @@ const DocumentType = function(mapping, resolvers) {
                 fieldsNLP[keyNLP] = {
                     type: getType(mapping[key].NLP[keyNLP].type),
                     resolve: (obj) => {
-                        console.log(mapping[key].NLP[keyNLP].field);
                         return "yes"; //_.get(obj, mapping[key].NLP[keyNLP].field)
                     }
                 }

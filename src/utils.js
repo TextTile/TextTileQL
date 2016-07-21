@@ -1,6 +1,5 @@
 function parseQuery(ast) {
     result = parseSelection(ast.operation);
-    console.log(result);
     return result;
 }
 

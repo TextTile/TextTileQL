@@ -9,19 +9,92 @@ const {
     GraphQLString
 } = require('graphql');
 
-
-
 const {getFieldsFromInfo} = require('graphql-utils');
 
+function mapEsField(field) {
+	let result = {};
+	if(field.properties) {
+		for(let prop in field.properties) {
+			let mapped = mapEsField(field.properties[prop]);
+			if(mapped) {
+				result[prop] = mapped
+				result[prop].field = prop;
+			}
+		}
+		return result;
+	} else {
+		if(field.type) {
+			switch(field.type) {
+				case "string":
+					if(field.index == "not_analyzed") {
+						return {
+							type: "String",
+						}	
+					}
+					return {
+						type: "Text"
+					}
+
+				case "long":
+				case "integer":
+				case "short":
+				case "byte":
+					return {
+						type: "Number"
+					}
+
+				case "float":
+				case "double":
+					return {
+						type: "Decimal"
+					}
+				case "date":
+					return {
+						type: "Date",
+						format: field.format
+					}
+				case "boolean":
+					return {
+						type: "Boolean"
+					}
+				default: 
+					return {};
+					//long, integer, short, byte, double, float
+			}
+		} else {
+			console.log('Outlier', field)
+		}
+	}
+	
+	
+}
+
+function parseMapping(mapping) {
+	return mapEsField(mapping);
+}
 
 class ElasticsearchPlugin {
     constructor(config) {
         this.config = config;
-        this.client = new elasticsearch.Client({
+        this.client = ElasticsearchPlugin.getClient(config)
+    }
+	static getClient(config) {
+		return new elasticsearch.Client({
             host: config.user ? `http://${config.user}:${config.password}@${config.server}` : config.server,
             //log: 'trace'
         });
-    }
+	}
+
+	static extractSchema(config) {
+		const client = ElasticsearchPlugin.getClient(config);
+		const {index, type} = config;
+		return client.indices.getMapping({
+			index: index,
+            type: type,
+		}).then(mapping => {
+			return parseMapping(mapping[index].mappings[type]);
+		})
+	}
 
     execute(body) {
         return this.client.search({
