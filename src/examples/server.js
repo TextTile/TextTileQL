@@ -3,7 +3,7 @@ var app = express();
 
 //Create a connection
 const ESPlugin = require('../plugins/elasticsearch/')
-const dataInfo = require('./enron.json')
+const dataInfo = require('./yelp.json')
 const TextTileHTTP = require('../TextTileHTTP')(dataInfo.mapping, new ESPlugin(dataInfo.config));
 
 //Create endpoint

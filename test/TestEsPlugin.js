@@ -35,7 +35,17 @@ describe('ES-Plugin',  function() {
             }).catch((error) => {throw error})
         })
     })
-    
+    it('Should Select', () => {
+        return TextTileExecutor().then(Executor => {
+            return Executor.query('{Select { Documents { Contents } }}').then((result) => {
+                if(result.errors) {
+                    throw Error(result.errors)
+                } else {
+                    expect(result).to.have.deep.property('data.Select.Documents');
+                }
+            }).catch((error) => {throw error})
+        })
+    })
 
 	it('Return a schema', () => {
         return ESPlugin.extractSchema(dataInfo.config).then(r => {

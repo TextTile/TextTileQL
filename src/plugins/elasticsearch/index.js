@@ -10,26 +10,29 @@ const {
 } = require('graphql');
 
 const {getFieldsFromInfo} = require('graphql-utils');
+const parseMapping = (mapping) => {
+	return mapEsField(mapping);
+};
 
-function mapEsField(field) {
+const mapEsField = (field) => {
 	let result = {};
-	if(field.properties) {
-		for(let prop in field.properties) {
+	if (field.properties) {
+		for (let prop in field.properties) {
 			let mapped = mapEsField(field.properties[prop]);
-			if(mapped) {
+			if (mapped) {
 				result[prop] = mapped
 				result[prop].field = prop;
 			}
 		}
 		return result;
 	} else {
-		if(field.type) {
-			switch(field.type) {
+		if (field.type) {
+			switch (field.type) {
 				case "string":
-					if(field.index == "not_analyzed") {
+					if (field.index == "not_analyzed") {
 						return {
 							type: "String",
-						}	
+						}
 					}
 					return {
 						type: "Text"
@@ -57,21 +60,18 @@ function mapEsField(field) {
 					return {
 						type: "Boolean"
 					}
-				default: 
+				default:
 					return {};
-					//long, integer, short, byte, double, float
+				//long, integer, short, byte, double, float
 			}
 		} else {
 			console.log('Outlier', field)
 		}
 	}
-	
-	
+
+
 }
 
-function parseMapping(mapping) {
-	return mapEsField(mapping);
-}
 
 class ElasticsearchPlugin {
     constructor(config) {
@@ -85,15 +85,15 @@ class ElasticsearchPlugin {
         });
 	}
 
-	static extractSchema(config) {
+	static extractMapping(config) {
 		const client = ElasticsearchPlugin.getClient(config);
 		const {index, type} = config;
 		return client.indices.getMapping({
 			index: index,
-            type: type,
+			type: type
 		}).then(mapping => {
 			return parseMapping(mapping[index].mappings[type]);
-		})
+		}).catch((err) => console.error(err));
 	}
 
     execute(body) {
@@ -119,8 +119,8 @@ class ElasticsearchPlugin {
 
                     summary: (field, source, args, context, ast) => {
                         return source[field].buckets.map(a => ({
-                           Key: a.key,
-                           Count: a.doc_count 
+							Key: a.key,
+							Count: a.doc_count
                         }));
                     },
 
@@ -133,17 +133,17 @@ class ElasticsearchPlugin {
                             })
                             if (summaries.length > 1) {
                                 summaries = summaries.reduce((a, b) => {
-                                    if(typeof(a) == "string") {
-                                        a = { [a]: { info: context.mapping[a]}}
+                                    if (typeof (a) == "string") {
+                                        a = { [a]: { info: context.mapping[a] } }
                                     }
-                                    return Object.assign(a, { [b]: { info: context.mapping[b] }})
+                                    return Object.assign(a, { [b]: { info: context.mapping[b] } })
                                 })
                             } else {
-                                
-                                summaries = { [summaries[0]]: { info: context.mapping[summaries[0]] }}
+
+                                summaries = { [summaries[0]]: { info: context.mapping[summaries[0]] } }
                             }
                         }
-                        
+
                         let query = compile({
                             filters: args.filters,
                             summaries: summaries

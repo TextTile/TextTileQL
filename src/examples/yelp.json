@@ -1,0 +1,225 @@
+{
+    "mapping":
+	{
+		"$nlp": {
+			"review_dot_text": {
+				"keyphrases": {
+					"Phrase": {
+						"type": "String",
+						"field": "Phrase"
+					},
+					"beginChar": {
+						"type": "Number",
+						"field": "beginChar"
+					},
+					"endChar": {
+						"type": "Number",
+						"field": "endChar"
+					},
+					"field": "keyphrases"
+				},
+				"sentiment": {
+					"type": "String",
+					"field": "sentiment"
+				},
+				"tokens": {
+					"Adjective": {
+						"type": "String",
+						"field": "Adjective"
+					},
+					"Lemma": {
+						"type": "String",
+						"field": "Lemma"
+					},
+					"Negative": {
+						"type": "String",
+						"field": "Negative"
+					},
+					"Noun": {
+						"type": "String",
+						"field": "Noun"
+					},
+					"Positive": {
+						"type": "String",
+						"field": "Positive"
+					},
+					"Verb": {
+						"type": "String",
+						"field": "Verb"
+					},
+					"Word": {
+						"type": "String",
+						"field": "Word"
+					},
+					"field": "tokens"
+				},
+				"field": "review_dot_text"
+			},
+			"field": "$nlp"
+		},
+		"business": {
+			"business_url": {
+				"type": "String",
+				"field": "business_url"
+			},
+			"category": {
+				"type": "String",
+				"field": "category"
+			},
+			"city": {
+				"type": "String",
+				"field": "city"
+			},
+			"country": {
+				"type": "String",
+				"field": "country"
+			},
+			"id": {
+				"type": "String",
+				"field": "id"
+			},
+			"name": {
+				"type": "String",
+				"field": "name"
+			},
+			"neighborhoods": {
+				"type": "String",
+				"field": "neighborhoods"
+			},
+			"phone": {
+				"type": "String",
+				"field": "phone"
+			},
+			"postal_code": {
+				"type": "String",
+				"field": "postal_code"
+			},
+			"rating": {
+				"type": "Decimal",
+				"field": "rating"
+			},
+			"review_count": {
+				"type": "Number",
+				"field": "review_count"
+			},
+			"state": {
+				"type": "String",
+				"field": "state"
+			},
+			"url": {
+				"type": "String",
+				"field": "url"
+			},
+			"field": "business"
+		},
+		"review": {
+			"created": {
+				"type": "Date",
+				"format": "epoch_millis||yyyy-MM-dd HH:mm:ss",
+				"field": "created"
+			},
+			"hasResponse": {
+				"type": "Boolean",
+				"field": "hasResponse"
+			},
+			"id": {
+				"type": "String",
+				"field": "id"
+			},
+			"previous": {
+				"created": {
+					"type": "Date",
+					"format": "epoch_millis||yyyy-MM-dd HH:mm:ss",
+					"field": "created"
+				},
+				"rating": {
+					"type": "Number",
+					"field": "rating"
+				},
+				"response": {
+					"type": "Text",
+					"field": "response"
+				},
+				"text": {
+					"type": "Text",
+					"field": "text"
+				},
+				"url": {
+					"type": "String",
+					"field": "url"
+				},
+				"field": "previous"
+			},
+			"previous_reviews": {
+				"created": {
+					"type": "Date",
+					"format": "epoch_millis||yyyy-MM-dd HH:mm:ss",
+					"field": "created"
+				},
+				"rating": {
+					"type": "Number",
+					"field": "rating"
+				},
+				"text": {
+					"type": "Text",
+					"field": "text"
+				},
+				"url": {
+					"type": "String",
+					"field": "url"
+				},
+				"field": "previous_reviews"
+			},
+			"rating": {
+				"type": "Number",
+				"field": "rating"
+			},
+			"response": {
+				"type": "Text",
+				"field": "response"
+			},
+			"text": {
+				"type": "Text",
+				"field": "text"
+			},
+			"url": {
+				"type": "String",
+				"field": "url"
+			},
+			"field": "review"
+		},
+		"user": {
+			"city": {
+				"type": "String",
+				"field": "city"
+			},
+			"gender": {
+				"type": "String",
+				"field": "gender"
+			},
+			"id": {
+				"type": "String",
+				"field": "id"
+			},
+			"name": {
+				"type": "String",
+				"field": "name"
+			},
+			"state": {
+				"type": "String",
+				"field": "state"
+			},
+			"zip": {
+				"type": "String",
+				"field": "zip"
+			},
+			"field": "user"
+		}
+	},
+	 "config": {
+        "server": "vgc.poly.edu/projects/es-gateway",
+        "index": "enron",
+        "type": "email"
+    }
+
+}
