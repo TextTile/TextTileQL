@@ -46,7 +46,7 @@
             "format": "E, dd MMM yyyy HH:mm:ss Z (z)"
         },
         "From": {
-            "field": "from",
+            "field": "from-address",
             "type": "String"
         },
         "FromAddress": {
@@ -93,7 +93,7 @@
             "format": "strict_date_optional_time||epoch_millis"
         },
         "To": {
-            "field": "to",
+            "field": "to-addresses",
             "type": "String"
         },
         "ToAddresses": {

@@ -3,14 +3,42 @@ function parseQuery(ast) {
     return result;
 }
 
+function parseValue(value) {
+	switch (value.kind) {
+		case 'ListValue':
+			return value.values.map(v => parseValue(v))
+		case 'ObjectValue':
+			let obj = {};
+			for(const field of value.fields) {
+				obj[field.name.value] = parseValue(field.value)
+			}
+			return obj
+		case 'IntValue':
+		case 'StringValue':
+		case 'EnumValue':
+			return value.value;
+			
+		default:
+			break;
+		
+	}
+	return true;
+}
+
 function parseSelection(selection) {
-    let result = {}
+    let keys = {}
+	let args = {};
+	if(selection.arguments && selection.arguments.length > 0) {
+		for (const argument of selection.arguments) {
+			args[argument.name.value] = parseValue(argument.value)
+		}
+	}
     if (selection.selectionSet) {
         for (let child of selection.selectionSet.selections) {
-            result[child.name.value] = { keys: parseSelection(child) };
+            keys[child.name.value] = parseSelection(child);
         }
     }
-    return result;
+    return {keys, args};
 }
 
 module.exports = { parseQuery }

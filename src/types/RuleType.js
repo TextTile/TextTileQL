@@ -11,9 +11,13 @@ const {
     GraphQLNonNull
 } = require('graphql');
 
-
-
+const FieldType = require('./FieldType')
+let cache;
+let previousMapping;
 const RuleType = function (mapping) {
+	if(mapping == previousMapping && cache) {
+		return cache;
+	}
     var OperationType = new GraphQLEnumType({
         name: 'Operation',
         values: {
@@ -24,23 +28,12 @@ const RuleType = function (mapping) {
         }
     });
 
-    let fields = {};
-    for (let key in mapping) {
-        fields[key] = {
-            value: mapping[key]
-        }
-    }
-
-    var FieldType = new GraphQLEnumType({
-        name: 'Field',
-        values: fields
-    });
-
-    return new GraphQLInputObjectType({
+	previousMapping = mapping;
+	cache =  new GraphQLInputObjectType({
         name: 'Rule',
         fields: {
             field: {
-                type: new GraphQLNonNull(FieldType),
+                type: new GraphQLNonNull(FieldType(mapping)),
             },
             operation: {
                 type: new GraphQLNonNull(OperationType)
@@ -50,6 +43,7 @@ const RuleType = function (mapping) {
             }
         }
     });
+	return cache;
 }
 
 module.exports = RuleType

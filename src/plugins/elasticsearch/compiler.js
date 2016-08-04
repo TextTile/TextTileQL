@@ -3,15 +3,74 @@ function compile(info) {
     if (info.filters) {
         query.query = getFilters(info.filters); 
     }
+	if(info.search) {
+		if(!query.query || !query.query.bool) {
+			query.query = { bool: { filter: [] } };
+		}
+		query.query.bool.filter.push({
+			query_string : {
+				query : info.search,
+				fields: getTextFields(info.mapping)
+			}
+		})
+	}
+	if(info.search || info.filters) {
+		query.highlight = getHighlight(info.mapping);
+	}
+
     if(info.summaries) {
         query.aggs = {}
-        
-        for (let key in info.summaries) {
-            let agg = getAggsField(info.summaries[key])
-            query.aggs[key] = agg
-        }
+        let agg2 = compileSummaries(info.summaries, !!info.filters);
+		query.aggs = compileSummaries(info.summaries, !!info.filters);
     }
     return query
+}
+
+function compileSummaries(summaries, hasFilters, group) {
+	let result = {};
+	for (let key in summaries) {
+		let agg = getAggsField(summaries[key], hasFilters)
+		if(summaries[key].summaries) {
+			agg.aggs = compileSummaries(summaries[key].summaries, true, 'Summaries')
+		}
+		if(summaries[key].Counts) {
+			agg.aggs = agg.aggs || {};
+			for(let field in summaries[key].Counts) {
+				agg.aggs[`Counts${field}`] = { cardinality : {field: summaries[key].Counts[field].info.field}}
+				agg.aggs[`Counts${field}`].meta = { group: 'Counts'}
+			}
+		}
+		agg.meta = { group }
+		if(!group) {
+			result[key] = agg
+		} else {
+			result[`Summaries${key}`] = agg
+		}
+	}
+	return result;
+}
+
+function getHighlight(mapping) {
+	const high = { fields : {} };
+	for (let rule in mapping) {
+		const obj = mapping[rule];
+		if(obj.type === 'Text') {
+			high.fields[rule] = {}
+		}
+	}
+	return high;
+}
+
+
+function getTextFields(mapping) {
+	const fields = [];
+	for (let rule in mapping) {
+		const obj = mapping[rule];
+		if(obj.type === 'Text') {
+			fields.push(rule)
+		}
+	}
+	return fields;
 }
 
 function getFilters(filters) {
@@ -25,11 +84,11 @@ function getFilters(filters) {
     return undefined;
 }
 
-function getAggsField(fieldInfo) {
+function getAggsField(fieldInfo, hasFilters) {
         try {
             let {field, type} = fieldInfo.info;
             let {limit, order, include,exclude, min_doc_count, significant, background_filter, interval} = fieldInfo.args || {};
-            exclude = exclude || [];
+			exclude = exclude || [];
 
             switch (type) {
                 case "List.String":
@@ -37,20 +96,22 @@ function getAggsField(fieldInfo) {
                     return {
                         "terms": {
                             "field": field,
-                            "size": limit || 1000,
+                            "size": limit || 50,
                             "order": order,
                             "include": include,
+							"collect_mode" : "breadth_first",
                             "min_doc_count": min_doc_count || 1
                         }
                     };
                     
                 case  "Text":
-                    //significant = false;
+                    significant = false;
                     if(significant) {
                         return {
                             "significant_terms": {
                                 "field": field,
-                                "mutual_information": {},
+								"collect_mode" : "breadth_first",
+                                "gnd": {},
                                // "script_heuristic": {
                                 //    "script": "_subset_freq/_subset_size * Math.log(_superset_size/_superset_freq)"
                                 //},
@@ -58,9 +119,9 @@ function getAggsField(fieldInfo) {
                                //     "script": "_subset_freq"
                                // },
                                 "include": include,
-                                "exclude": exclude,
+                                "exclude": '.*[0-9].*',
                                 "size": limit || 50,
-                                //"min_doc_count": min_doc_count || 1,
+                                
                                 "background_filter": background_filter
                             }
                         };
@@ -70,6 +131,7 @@ function getAggsField(fieldInfo) {
                             "field": field,
                             "include": include,
                             "exclude": exclude,
+							"collect_mode" : "breadth_first",
                             "size": limit || 50,
                             "order": order,
                             "min_doc_count": min_doc_count || 1

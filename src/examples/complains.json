@@ -1,0 +1,135 @@
+{
+    "mapping": {
+		"company": {
+			"key": "company",
+			"description": "Company",
+			"field": "company",
+			"type": "String",
+			"selected": true
+		},
+		"companyPublicResponse": {
+			"key": "companyPublicResponse",
+			"description": "Company public response",
+			"field": "companyPublicResponse",
+			"type": "Text",
+			"selected": true
+		},
+		"companyResponseToConsumer": {
+			"key": "companyResponseToConsumer",
+			"description": "Company response to consumer",
+			"field": "companyResponseToConsumer",
+			"type": "String",
+			"selected": true
+		},
+		"complaintId": {
+			"key": "complaintId",
+			"description": "Complaint ID",
+			"field": "complaintId",
+			"type": "Number",
+			"selected": true
+		},
+		"consumerComplaintNarrative": {
+			"key": "consumerComplaintNarrative",
+			"description": "Consumer complaint narrative",
+			"field": "consumerComplaintNarrative",
+			"type": "Text",
+			"selected": true
+		},
+		"consumerConsentProvided": {
+			"key": "consumerConsentProvided",
+			"description": "Consumer consent provided?",
+			"field": "consumerConsentProvided",
+			"type": "String",
+			"selected": true
+		},
+		"consumerDisputed": {
+			"key": "consumerDisputed",
+			"description": "Consumer disputed?",
+			"field": "consumerDisputed",
+			"type": "String",
+			"selected": true
+		},
+		"dateReceived": {
+			"key": "dateReceived",
+			"description": "Date received",
+			"field": "dateReceived",
+			"type": "Date",
+			"selected": true
+		},
+		"dateSentToCompany": {
+			"key": "dateSentToCompany",
+			"description": "Date sent to company",
+			"field": "dateSentToCompany",
+			"type": "Date",
+			"selected": true
+		},
+		"issue": {
+			"key": "issue",
+			"description": "Issue",
+			"field": "issue",
+			"type": "String",
+			"selected": true
+		},
+		"product": {
+			"key": "product",
+			"description": "Product",
+			"field": "product",
+			"type": "String",
+			"selected": true
+		},
+		"state": {
+			"key": "state",
+			"description": "State",
+			"field": "state",
+			"type": "String",
+			"selected": true
+		},
+		"subIssue": {
+			"key": "subIssue",
+			"description": "Sub-issue",
+			"field": "subIssue",
+			"type": "String",
+			"selected": true
+		},
+		"subProduct": {
+			"key": "subProduct",
+			"description": "Sub-product",
+			"field": "subProduct",
+			"type": "String",
+			"selected": true
+		},
+		"submittedVia": {
+			"key": "submittedVia",
+			"description": "Submitted via",
+			"field": "submittedVia",
+			"type": "String",
+			"selected": true
+		},
+		"tags": {
+			"key": "tags",
+			"description": "Tags",
+			"field": "tags",
+			"type": "String",
+			"selected": true
+		},
+		"timelyResponse": {
+			"key": "timelyResponse",
+			"description": "Timely response?",
+			"field": "timelyResponse",
+			"type": "String",
+			"selected": true
+		},
+		"zipCode": {
+			"key": "zipCode",
+			"description": "ZIP code",
+			"field": "zipCode",
+			"type": "String",
+			"selected": true
+		}
+	},
+    "config": {
+        "server": "http://localhost:7458",
+        "index": "consumer-complaints",
+        "type": "document"
+    }
+}

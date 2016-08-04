@@ -4,7 +4,8 @@ const {
     GraphQLObjectType,
     GraphQLString,
     GraphQLBoolean,
-    GraphQLList
+    GraphQLList,
+	GraphQLInt
 } = require('graphql');
 
 
@@ -21,6 +22,10 @@ const SelectType = function (mapping = {}, resolvers = {}) {
                     return obj.documents
                 })
             },
+			Count: {
+				type: GraphQLInt,
+				resolve: resolvers.count
+			},
             Summaries: {
                 type: SummariesType
             }
