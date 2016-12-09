@@ -13,7 +13,7 @@ const FieldType = require('./FieldType')
 const DocumentType = require('./DocumentType')
 const SummaryRuleType = require('./SummaryRuleType')
 
-var IntervalType = new GraphQLEnumType({
+const IntervalType = new GraphQLEnumType({
 	name: 'Interval',
 	values: {
 		Year: { value: "year" },

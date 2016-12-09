@@ -8,7 +8,7 @@ const {
 } = require('graphql');
 
 
-function build(mapping, schemaLoader) {
+const build = function build(mapping, schemaLoader) {
     return Promise.resolve(schemaLoader).then(info => {
 		try {
 			const {resolvers} = info;

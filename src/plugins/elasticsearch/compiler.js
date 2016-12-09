@@ -9,7 +9,7 @@ function prepareQuery(query) {
 //517053
 //14656
 //502397
-function compile(info) {
+const compile = function compile(info) {
     let query = {};
     if (info.filters) {
         query.query = getFilters(info.filters);
@@ -67,7 +67,7 @@ function compile(info) {
     return query
 }
 
-function compileStats(stats, hasFilters, group, mapping) {
+const compileStats = function compileStats(stats, hasFilters, group, mapping) {
 	let result = {};
 	for (let key in stats.keys) {
 		let agg = { "stats" : { "field" : mapping[key].field } }
@@ -82,7 +82,7 @@ function compileStats(stats, hasFilters, group, mapping) {
 	return result;
 }
 
-function compileSummaries(summaries, hasFilters, group) {
+const compileSummaries = function compileSummaries(summaries, hasFilters, group) {
 	let result = {};
 	for (let key in summaries) {
 		let agg = getAggsField(summaries[key], hasFilters)
@@ -106,7 +106,7 @@ function compileSummaries(summaries, hasFilters, group) {
 	return result;
 }
 
-function getHighlight(mapping) {
+const getHighlight = function getHighlight(mapping) {
 	const high = { fields : {} };
 	for (let rule in mapping) {
 		const obj = mapping[rule];
@@ -118,7 +118,7 @@ function getHighlight(mapping) {
 }
 
 
-function getTextFields(mapping) {
+const getTextFields = function getTextFields(mapping) {
 	const fields = [];
 	for (let rule in mapping) {
 		const obj = mapping[rule];
@@ -129,7 +129,7 @@ function getTextFields(mapping) {
 	return fields;
 }
 
-function getFilters(filters) {
+const getFilters = function getFilters(filters) {
     if (filters) {
         let result = { bool: { filter: [] } };
         for (let rule of filters) {
@@ -140,7 +140,7 @@ function getFilters(filters) {
     return undefined;
 }
 
-function getMust(must, mapping) {
+const getMust = function getMust(must, mapping) {
     if (must) {
         let result = [];
 		
@@ -152,7 +152,7 @@ function getMust(must, mapping) {
     return undefined;
 }
 
-function getAggsField(fieldInfo, hasFilters) {
+const getAggsField = function getAggsField(fieldInfo, hasFilters) {
         try {
             let {field, type} = fieldInfo.info;
             let {limit, order, exclude, only, min_doc_count, significant, background_filter, interval} = fieldInfo.args || {};
@@ -252,7 +252,7 @@ function getAggsField(fieldInfo, hasFilters) {
         }
     }
 
-function getFilterRule(rule) {
+const getFilterRule = function getFilterRule(rule) {
 
     try {
         let {operation, value} = rule;
@@ -313,7 +313,7 @@ function getFilterRule(rule) {
     }
 }
 
-function getFieldFilter(field, value, type) {
+const getFieldFilter = function getFieldFilter(field, value, type) {
 	switch (type) {
 		case "String":
 		case "List.String":
@@ -344,7 +344,7 @@ function getFieldFilter(field, value, type) {
 	}
 }
 
-function getMustRule(rule, mapping) {
+const getMustRule = function getMustRule(rule, mapping) {
     try {
 		let result = { bool: { should: [] } };
 		let rules = _.keys(rule).map(field => {
@@ -359,11 +359,11 @@ function getMustRule(rule, mapping) {
 }
 
 
-function cammel(str) {
+const cammel = function cammel(str) {
     return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
 }
 
-function getDateFormat(interval) {
+const getDateFormat = function getDateFormat(interval) {
         switch (interval) {
             case "year":
                 return "yyyy";
