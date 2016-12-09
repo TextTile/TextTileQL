@@ -1,8 +1,33 @@
+const _ = require('lodash')
+
+function prepareQuery(query) {
+	if(!query.query || !query.query.bool) {
+		query.query = { bool: { } };
+	}
+	return query;
+}
+//517053
+//14656
+//502397
 function compile(info) {
     let query = {};
     if (info.filters) {
-        query.query = getFilters(info.filters); 
+        query.query = getFilters(info.filters);
     }
+
+	if (info.must) {
+		query = prepareQuery(query);
+		query.query.bool.filter = query.query.bool.filter || [];
+        query.query.bool.filter = query.query.bool.filter.concat(getMust(info.must, info.mapping));
+    }
+
+	if (info.not) {
+        query = prepareQuery(query);
+		query.query.bool.must_not = query.query.bool.must_not || [];
+        query.query.bool.must_not = query.query.bool.must_not.concat(getMust(info.not, info.mapping));
+		
+    }
+
 	if(info.search) {
 		if(!query.query || !query.query.bool) {
 			query.query = { bool: { filter: [] } };
@@ -14,16 +39,47 @@ function compile(info) {
 			}
 		})
 	}
-	if(info.search || info.filters) {
+	if(info.search || info.filters || info.must) {
 		query.highlight = getHighlight(info.mapping);
+	}
+
+	if(info.documents) {
+		let {documents} = info;
+		query.from = _.get(documents, "args.skip");
+
+		query.size = _.get(documents, "args.limit") || 10;
+	} else {
+		query.size = 0;
 	}
 
     if(info.summaries) {
         query.aggs = {}
-        let agg2 = compileSummaries(info.summaries, !!info.filters);
+        //let agg2 = compileSummaries(info.summaries, !!info.filters);
 		query.aggs = compileSummaries(info.summaries, !!info.filters);
     }
+
+	if(info.stats) {
+		query.aggs = query.aggs  || {}
+
+		query.aggs = _.assign(query.aggs, compileStats(info.stats, !!info.filters, "Stats", info.mapping)) 
+	}
+
     return query
+}
+
+function compileStats(stats, hasFilters, group, mapping) {
+	let result = {};
+	for (let key in stats.keys) {
+		let agg = { "stats" : { "field" : mapping[key].field } }
+		
+		agg.meta = { group }
+		if(!group) {
+			result[key] = agg
+		} else {
+			result[`_Stats_${key}`] = agg
+		}
+	}
+	return result;
 }
 
 function compileSummaries(summaries, hasFilters, group) {
@@ -84,16 +140,29 @@ function getFilters(filters) {
     return undefined;
 }
 
+function getMust(must, mapping) {
+    if (must) {
+        let result = [];
+		
+        for (let rule of must) {
+            result.push(getMustRule(rule, mapping));
+        }
+        return result;
+    }
+    return undefined;
+}
+
 function getAggsField(fieldInfo, hasFilters) {
         try {
             let {field, type} = fieldInfo.info;
-            let {limit, order, include,exclude, min_doc_count, significant, background_filter, interval} = fieldInfo.args || {};
+            let {limit, order, exclude, only, min_doc_count, significant, background_filter, interval} = fieldInfo.args || {};
 			exclude = exclude || [];
-
+			interval = interval ? interval.toLowerCase() : interval;
+			let include = only;
             switch (type) {
                 case "List.String":
                 case "String":
-                    return {
+                    let resultString = {
                         "terms": {
                             "field": field,
                             "size": limit || 50,
@@ -102,8 +171,13 @@ function getAggsField(fieldInfo, hasFilters) {
 							"collect_mode" : "breadth_first",
                             "min_doc_count": min_doc_count || 1
                         }
-                    };
-                    
+                    }
+                    if(typeof field === 'object') {
+                        delete resultString.terms.field;
+                        resultString.terms.script = field.map(f => `doc['${f}'].values`).join(" + ")
+                    }
+                    return resultString
+
                 case  "Text":
                     significant = false;
                     if(significant) {
@@ -121,7 +195,7 @@ function getAggsField(fieldInfo, hasFilters) {
                                 "include": include,
                                 "exclude": '.*[0-9].*',
                                 "size": limit || 50,
-                                
+
                                 "background_filter": background_filter
                             }
                         };
@@ -137,7 +211,7 @@ function getAggsField(fieldInfo, hasFilters) {
                             "min_doc_count": min_doc_count || 1
                         }
                     };
-                    
+
                 case  "Number":
                     return {
                         "histogram": {
@@ -146,7 +220,7 @@ function getAggsField(fieldInfo, hasFilters) {
                             "order": order
                         }
                     };
-                    
+
                 case  "CONTINUOUS":
                     return {
                         "histogram": {
@@ -155,7 +229,7 @@ function getAggsField(fieldInfo, hasFilters) {
                             "order": order
                         }
                     };
-                    
+
                 case  "Date":
                     return {
                         "date_histogram": {
@@ -164,14 +238,14 @@ function getAggsField(fieldInfo, hasFilters) {
                             "format": getDateFormat(interval || "month")
                         }
                     };
-                    
+
                 case  "Boolean":
                     return {
                         "terms": {
                             "field": field
                         }
                     };
-                    
+
             }
         } catch(ex) {
             console.error(ex);
@@ -179,6 +253,7 @@ function getAggsField(fieldInfo, hasFilters) {
     }
 
 function getFilterRule(rule) {
+
     try {
         let {operation, value} = rule;
         let {field, type} = rule.field;
@@ -189,11 +264,22 @@ function getFilterRule(rule) {
                 keys = keys.concat(value.map(k => k.toLowerCase()))
                 keys = keys.concat(value.map(k => k.toUpperCase()))
                 keys = keys.concat(value.map(k => cammel(k.toLowerCase())))
+                if(typeof field === 'object') {
+                    let result = {or: []};
+                    for(let f of field) {
+                        result.or.push({ "terms": { [f]: keys } })
+                    }
+                    return result;
+                }
                 return { "terms": { [field]: keys } };
 
 
             case "contains":
-                return { "query_string": { "default_field": field, "query": value } };
+                if(typeof field === 'object') {
+                    return { "query_string": { "fields": field, "query": value.join(" ") } };
+                }
+
+                return { "query_string": { "default_field": field, "query": value.join(" ") } };
 
 
             case "between":
@@ -203,7 +289,7 @@ function getFilterRule(rule) {
                             [field]: {
                                 "gte": value[0],
                                 "lte": value[1],
-                                "format": "yyyy-mm-dd"
+                                "format": "yyyy-MM-dd"
                             }
                         }
                     };
@@ -226,6 +312,52 @@ function getFilterRule(rule) {
         console.trace(ex);
     }
 }
+
+function getFieldFilter(field, value, type) {
+	switch (type) {
+		case "String":
+		case "List.String":
+			return { "terms": { [field]: value } };
+		case "Text": 
+			return { "query_string": { "default_field": field, "query": value.join(" ") } };
+		case "Date":
+			return { "range": {
+					[field]: {
+						"gte": !value[0] ? undefined : value[0],
+						"lte":!value[1] ? undefined : value[1],
+						"format": "yyyy-MM-dd"
+					}
+				}
+			}
+		case "Number":
+			return {
+				"range": {
+					[field]: {
+						"gte":  !value[0] ? undefined : value[0],
+						"lte":  !value[1] ? undefined : value[1]
+					}
+				}
+			};
+			
+		default:
+			break;
+	}
+}
+
+function getMustRule(rule, mapping) {
+    try {
+		let result = { bool: { should: [] } };
+		let rules = _.keys(rule).map(field => {
+			let fieldType = mapping[field].type;
+			return getFieldFilter(mapping[field].field, rule[field], mapping[field].type)
+		})
+		result.bool.should.push(rules);
+        return result;
+    } catch (ex) {
+        console.trace(ex);
+    }
+}
+
 
 function cammel(str) {
     return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });

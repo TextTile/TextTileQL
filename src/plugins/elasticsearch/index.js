@@ -81,7 +81,7 @@ class ElasticsearchPlugin {
 	static getClient(config) {
 		return new elasticsearch.Client({
             host: config.user ? `http://${config.user}:${config.password}@${config.server}` : config.server,
-            log: 'trace'
+            //log: 'trace'
         });
 	}
 
@@ -105,8 +105,7 @@ class ElasticsearchPlugin {
 	}
 
     execute(body) {
-		console.log(JSON.stringify(body, null, 4));
-		body.timeout = 3600;
+		body.timeout = 13600;
         return this.client.search({
             index: this.config.index,
             type: this.config.type,
@@ -195,10 +194,25 @@ getSchema() {
 					return source.Count;
 				},
 
+				stats: (field, source, args, context, ast) => {
+					return {
+						Count: source[field].min,
+						Min: source[field].min,
+						Max: source[field].max,
+						Avg: source[field].avg,
+						Sum: source[field].sum,
+						MinAsString: source[field].min_as_string,
+						MaxAsString: source[field].max_as_string,
+						AvgAsString: source[field].avg_as_string,
+						SumAsString: source[field].sum_as_string,
+					}
+				},
+
 				summary: (field, source, args, context, ast) => {
 					let result = source[field].buckets.map(a => {
 						let result = {
 							Key: a.key,
+							KeyAsString: a.key_as_string,
 							Count: a.doc_count
 						}
 						for (let key in a) {
@@ -221,13 +235,21 @@ getSchema() {
 				select: (source, args = {}, context, ast) => {
 					context = context || source;
 					let simpleQuery = parseQuery(ast);
+					
 					let summaries = this.parseSummaries(_.get(simpleQuery.keys, "Select"), context)
+
+					let documents = _.get(simpleQuery.keys, "Select.keys.Documents");
+					let stats = _.get(simpleQuery.keys, "Select.keys.Stats");
 					try {
 						let query = compile({
 							filters: args.filters,
+							must: args.must,
+							not: args.not,
+							documents: documents,
 							search: args.search,
 							summaries: summaries,
-							mapping: context.mapping
+							mapping: context.mapping,
+							stats: stats
 						})
 
 						return this.execute(query).then(result => {
@@ -235,6 +257,10 @@ getSchema() {
 							data.documents = result.hits.hits
 							data.Summaries = result.aggregations
 							data.Count = result.hits.total
+							data.Stats = _.pick(result.aggregations, _.keys(result.aggregations).filter((k) => result.aggregations[k].meta.group === "Stats" ))
+							data.Stats = _.mapKeys(data.Stats, (value, key) => {
+								return key.replace("_Stats_", "")
+							})
 							return data
 						}).catch(err => { console.error(err) })
 					} catch (error) {

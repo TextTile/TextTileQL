@@ -13,6 +13,7 @@ function build(mapping, schemaLoader) {
 		try {
 			const {resolvers} = info;
 			const RuleType = require('./types/RuleType')
+			const MustRuleType = require('./types/MustRuleType')
 			const SelectType = require('./types/SelectType')(mapping, resolvers);
 			const DocumentType = require('./types/DocumentType')(mapping, resolvers)
 			return new GraphQLSchema({
@@ -36,7 +37,9 @@ function build(mapping, schemaLoader) {
 							type: SelectType,
 							resolve: resolvers.select,
 							args: {
-								filters: { type: new GraphQLList(RuleType(mapping)) },
+								filters: { type: new GraphQLList(RuleType(mapping)), description: "filters in the data", deprecationReason: "Replaced with Must", isDeprecated: true },
+								must: {type: new GraphQLList(MustRuleType(mapping))},
+								not: {type: new GraphQLList(MustRuleType(mapping))},
 								search: { type: GraphQLString }
 							},
 						}

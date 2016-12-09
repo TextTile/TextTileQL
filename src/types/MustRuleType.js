@@ -16,26 +16,27 @@ const OperationType = require("./OperationType")
 const FieldType = require('./FieldType')
 let cache;
 let previousMapping;
+
+
+
 const RuleType = function (mapping) {
 	if(mapping == previousMapping && cache) {
 		return cache;
 	}
     
-
 	previousMapping = mapping;
+
+	let fields = {}
+
+	for (let key in mapping) {
+		fields[key] = {
+			type: new GraphQLList(GraphQLString)
+		}
+	}
+
 	cache =  new GraphQLInputObjectType({
-        name: 'Rule',
-        fields: {
-            field: {
-                type: new GraphQLNonNull(FieldType(mapping)),
-            },
-            operation: {
-                type: new GraphQLNonNull(OperationType)
-            },
-            value: {
-                type: new GraphQLNonNull(new GraphQLList(GraphQLString))
-            }
-        }
+        name: 'MustRule',
+        fields: fields
     });
 	return cache;
 }

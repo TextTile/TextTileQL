@@ -5,11 +5,28 @@ const {
     GraphQLString,
     GraphQLBoolean,
     GraphQLList,
-    GraphQLInt
+    GraphQLInt,
+	GraphQLEnumType
 } = require('graphql');
 const _ = require('lodash')
 const FieldType = require('./FieldType')
 const DocumentType = require('./DocumentType')
+const SummaryRuleType = require('./SummaryRuleType')
+
+var IntervalType = new GraphQLEnumType({
+	name: 'Interval',
+	values: {
+		Year: { value: "year" },
+		Month: { value: "month" },
+		Quarter: { value: "quarter" },
+		Week: { value: "week" },
+		Day: { value: "day" },
+		Hour: { value: "hour" },
+		Minute: { value: "minute" },
+		Second: { value: "second" },
+		
+	}
+});
 
 
 const createSummaryFields = function (mapping = {}, resolvers = {}) {
@@ -46,6 +63,7 @@ const SummaryType = function (mapping = {}, resolvers = {}) {
 		name: "TextSummary",
 		fields: {
 			Key: { type: GraphQLString },
+			KeyAsString: { type: GraphQLString },
 			Count: { type: GraphQLInt},
 			Counts: {type: Counts},
 			Score: { type: GraphQLInt },
@@ -59,7 +77,10 @@ const SummaryType = function (mapping = {}, resolvers = {}) {
 			type: new GraphQLList(Type),
 			args: {
 				skip: { type: GraphQLInt },
-				limit: { type: GraphQLInt }
+				limit: { type: GraphQLInt },
+				interval: { type: IntervalType },
+				filters: { type: new GraphQLList(SummaryRuleType(mapping)) },
+				only: { type: new GraphQLList(GraphQLString) }
 			},
 			resolve: (obj = {}, args, context, ast) => {
 				if (resolvers.summary) {
